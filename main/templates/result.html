@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Тестирование на тему: "{{quest.title}}" </h1>
+<h5>Тестирование прошел: {{current_user.username}}</h5>
+<hr>
+    {% set answ_value1 = namespace(a = []) %}
+    {% for k,v in data.items() %}
+        <span class="d-none">{{answ_value1.a.append(v)}}</span>
+        {{k.replace('answ', 'Ответ ')}}:  {{v}}
+    <br>
+    {% endfor %}
+<hr>
+{{dt}}
+<span class="d-none">
+{% set answ_value2 = namespace(a = []) %}
+{% for q in questions %}
+{{answ_value2.a.append(q.get('Answer'))}}
+{% endfor %}
+<!--{{answ_value1.a}}-->
+<!--{{answ_value2.a}}-->
+
+{% set score = namespace(a = 0) %}
+{% set count = namespace(a = 0) %}
+{% for i in answ_value2.a %}
+{% set count.a = count.a + 1 %}
+    {% if answ_value1.a[loop.index0] == answ_value2.a[loop.index0] %}
+    {{loop.index0}}
+    {% set score.a = score.a + 1 %}
+    {% else %}
+    {% endif %}
+{% endfor %}
+</span>
+<br>
+
+<br>
+Правильных ответов: {{score.a}}/{{count.a}}
+<br>
+Процент правильных ответов: {{((score.a/count.a)*100)|int}}%
+<br>
+
+<a class="btn btn-dark my-4 text-white" href="{{ url_for('result_handling',post_id=post_id, score=(((score.a/count.a)*100)|int),passe_date=dt,user_id=current_user.id,test_id=quest.id) }}">Скачать результат</a>
+
+{% endblock content %}

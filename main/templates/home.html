@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <div class="col-md-12 d-flex justify-content-center flex-wrap mt-3">
+        {% for post in posts.items %}
+        <article class="media content-section col-md-5 mx-2">
+          <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+              <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+            </div>
+            <h2><a class="article-title"  style="word-break: break-word;"href="{{ url_for('post', post_id=post.id) }}">{{ post.title[:40]}}</a></h2>
+            <p class="article-content text-muted" style="word-break: break-word;">{{ post.content[:50]}}... </p>
+          </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-12 d-flex justify-content-center flex-wrap">
+    {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if page_num %}
+        {% if posts.page == page_num %}
+          <a class="btn mx-1 btn btn-dark  mb-4" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+        {% else %}
+          <a class="btn mx-1 btn btn-light  mb-4" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+        ...
+      {% endif %}
+    {% endfor %}
+    </div>
+{% endblock content %}

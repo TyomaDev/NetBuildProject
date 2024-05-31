@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+{% if quest %}
+
+<div class="col-md-10 d-flex  justify-content-center flex-wrap">
+    <h1 class="col-12 text-center my-4">{{quest.title}}</h1>
+        <hr>
+    <form method="POST" action="{{url_for('result', post_id=quest.post_id)}}">
+        <div class="col-md-12 text-center">
+            {% set ns = namespace(c = 0) %}
+
+            {% for q in question %}
+            {% set ns.c = ns.c + 1 %}
+                  <h5>{{q.get('Question')}}</h5>
+                <br>
+                <input class="form-control form-control-lg col-md-4 text-center mx-auto" name="answ{{ns.c}}" placeholder='Ответ'>
+                <hr class="col-md-6 my-5">
+
+            {% endfor %}
+        </div>
+
+        <div class="form-group text-center col-md-12 ">
+            <input class="btn btn-dark" type="submit" value="Отправить">
+             {% if is_not_author == False %}
+            <a class="btn btn-dark my-4" href="{{url_for('change_test', post_id=quest.post_id)}}">Редактировать</a>
+            {% endif %}
+        </div>
+    </form>
+{% else %}
+    <h1> К этой статье нет теста </h1>
+{% endif %}
+</div>
+
+{% endblock content %}
