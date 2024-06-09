@@ -1,8 +1,5 @@
 from datetime import datetime
-
 from flask import render_template, url_for, flash, redirect, request, abort
-
-
 from main import app, db, bcrypt
 from main.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm,TestForm
 from main.models import User, Post, Publication, PassedTests
@@ -11,22 +8,11 @@ import os
 import secrets
 from PIL import Image
 import json
-from datetime import datetime
-
-
 from flask import send_file, make_response
 import tempfile
-from datetime import datetime
 import docx
 from docx.shared import Pt
 
-
-import docx
-from docx.shared import Pt
-# try:
-#     from win32comext.shell import shell, shellcon
-# except:
-#     from dotenv import dotenv_values
 
 @app.route("/")
 def lending():
@@ -253,31 +239,6 @@ def result(post_id):
     dt = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     return render_template('result.html', title='Новый тест',post_id=post_id, questions=questions,quest=quest, legend='Новый тест', data=a, dt=dt)
 
-
-def get_user_dir(name: str) -> str:
-    # Сперва получаем домашний каталог традиционным способом
-    home_dir = os.path.expanduser("~")
-
-    # Потом ищем путь к каталогу, в котором хранятся настройки
-    config_dir = os.getenv("XDG_CONFIG_HOME") or os.path.join(home_dir, ".config")
-
-    # Загружаем файл с описанием каталогов
-    data = dotenv_values(os.path.join(config_dir, "user-dirs.dirs"))
-
-    # Получаем путь из файла или генерируем его, если в файле нет нужного пути
-    key = f"XDG_{name}_DIR"
-    if key in data:
-        path = data[key]
-    elif key == "DESKTOP":
-        path = os.path.join(home_dir, "Desktop")
-    else:
-        path = home_dir
-
-    # Если путь начинается на $HOME, то нужно подставить туда домашний каталог
-    if path.startswith("$HOME/"):
-        path = os.path.join(home_dir, path[6:])
-
-    return path
 
 def save_word(passed_test):
     user_by_id = db.session.query(User).filter(User.id == passed_test.user_id).order_by(User.id.desc()).first()
