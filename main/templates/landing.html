@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="container py-4">
+    <div class="px-5 mb-4 bg-body-tertiary rounded-3">
+      <div class="container-fluid py-5">
+        <h1 style="font-size:4rem;">Сетьстрой Обучение</h1>
+        <h2>
+          Веб-приложение по обучению персонала для ЗАО «Сетьстрой»
+        </h2>
+        <h5>
+          Целью проекта является разработка веб-приложения, которое позволит сотрудникам организации читать учебные
+          материалы, зарегистрированным пользователям проходить тестирования и сохранять результаты,
+          а администратору добавлять и изменять необходимые материалы.
+        </h5>
+        <br>
+        <a class="btn btn-dark px-5" href="{{ url_for('home') }}">
+          Начать
+        </a>
+      </div>
+    </div>
+  <hr>
+    <div class="row align-items-md-stretch">
+      <div class="col-md-6">
+        <div class="h-100 p-5 text-bg-dark rounded-3">
+          <h2>Актуальность</h2>
+          <h5>
+            В настоящее время все больше компаний переходят на онлайн-обучение сотрудников, компании хотят видеть
+            отечественные решения проблемы обучения персонала и учета их знаний.
+          </h5>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+          <h2>Вы уже зарегистрированы?</h2>
+          <h5>
+            Для прохожения тестирований и сохранения результатов постеители сайта дожны пройти регистрацию!
+          </h5>
+          <a class="btn btn-outline-secondary" href="{{ url_for('register') }}">
+            Создать аккаунт
+          </a>
+          <a class="btn btn-outline-secondary" href="{{ url_for('login') }}">
+            Войти
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
