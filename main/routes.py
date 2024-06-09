@@ -23,11 +23,15 @@ from docx.shared import Pt
 
 import docx
 from docx.shared import Pt
-try:
-    from win32comext.shell import shell, shellcon
-except:
-    from dotenv import dotenv_values
+# try:
+#     from win32comext.shell import shell, shellcon
+# except:
+#     from dotenv import dotenv_values
+
 @app.route("/")
+def lending():
+    return render_template('landing.html', title='Сетьстрой обучение')
+
 @app.route("/home")
 def home():
     page = request.args.get('page', 1, type=int)
@@ -275,31 +279,6 @@ def get_user_dir(name: str) -> str:
 
     return path
 
-
-# def save_word(passed_test):
-#     user_by_id = db.session.query(User).filter(User.id == passed_test.user_id).order_by(User.id.desc()).first()
-#     publication_by_id = db.session.query(Publication).filter(Publication.id == passed_test.test_id).order_by(Publication.id.desc()).first()
-
-#     # сохранение в word
-#     doc = docx.Document()
-#     style = doc.styles['Normal']
-#     style.font.name = 'Arial'
-#     style.font.size = Pt(14)
-#     doc.add_paragraph('Название тестирования: '+publication_by_id.title)
-#     doc.add_paragraph('Прошел тестирование: '+user_by_id.username)
-#     doc.add_paragraph('Процент правильных ответов: '+str(passed_test.score)+'%')
-#     doc.add_paragraph('Дата прохождения тестирования: '+passed_test.passe_date.strftime("%d.%m.%Y %H:%M:%S"))
-#     try:
-#         path = shell.SHGetKnownFolderPath(shellcon.FOLDERID_Desktop)
-#         path +='\\text.doc'
-#         print(path)
-#         doc.save(path)
-#     except:
-#         path = get_user_dir("DESKTOP")
-#         path += '/text.doc'
-#         print(path)
-#         doc.save(path)
-#     # /сохранение в word
 def save_word(passed_test):
     user_by_id = db.session.query(User).filter(User.id == passed_test.user_id).order_by(User.id.desc()).first()
     publication_by_id = db.session.query(Publication).filter(Publication.id == passed_test.test_id).order_by(Publication.id.desc()).first()
@@ -318,31 +297,6 @@ def save_word(passed_test):
         temp_path = temp.name
     
     return temp_path
-
-
-# @app.route("/post/<int:post_id>/test/result_handling/<int:score>/<int:user_id>/<int:test_id>/<string:passe_date>", methods=['GET', 'POST'])
-# @login_required
-# def result_handling(post_id,score,user_id,test_id,passe_date):
-#     # try:
-#         a=datetime.strptime(passe_date, "%d.%m.%Y %H:%M:%S")
-#         result2 = PassedTests(score=score, passe_date=a, user_id=user_id, test_id=test_id)
-#         db.session.add(result2)
-#         db.session.commit()
-#         passed_test = db.session.query(PassedTests).filter(PassedTests.user_id == current_user.id
-#                                                            and PassedTests.test_id == test_id).order_by(PassedTests.id.desc()).first()
-#         save_word(passed_test)
-#         print(passed_test)
-#         flash('Тестирование сохранено!', 'success')
-#     # except:
-#     #     flash('Тестирование не сохранено!', 'danger')
-#     # finally:
-#         return redirect(url_for('home'))
-
-
-# @app.errorhandler(403)
-# @app.errorhandler(404)
-# def pageNotFound(error):
-#     return render_template('page404.html', title='Страница не найдена')
 
 
 @app.route("/post/<int:post_id>/test/result_handling/<int:score>/<int:user_id>/<int:test_id>/<string:passe_date>", methods=['GET', 'POST'])
