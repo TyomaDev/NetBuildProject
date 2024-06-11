@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import render_template, url_for, flash, redirect, request, abort
 from main import app, db, bcrypt
-from main.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm,TestForm
+from main.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, TestForm
 from main.models import User, Post, Publication, PassedTests
 from flask_login import login_user, current_user, logout_user, login_required
 import os
@@ -17,6 +17,7 @@ from docx.shared import Pt
 @app.route("/")
 def lending():
     return render_template('landing.html', title='Сетьстрой обучение')
+
 
 @app.route("/home")
 def home():
@@ -98,8 +99,11 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+
+    quest = db.session.query(PassedTests, Publication).filter(PassedTests.user_id==current_user.id).filter(PassedTests.test_id == Publication.id).all()
+    print(quest)
     return render_template('account.html', title='Аккаунт',
-                           image_file=image_file, form=form)
+                           image_file=image_file, form=form, quest=quest)
 
 
 @app.route("/post/new", methods=['GET', 'POST'])
@@ -163,8 +167,8 @@ def delete_post(post_id):
 def user_posts(username):
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(username=username).first_or_404()
-    posts = Post.query.filter_by(author=user)\
-        .order_by(Post.date_posted.desc())\
+    posts = Post.query.filter_by(author=user) \
+        .order_by(Post.date_posted.desc()) \
         .paginate(page=page, per_page=6)
     return render_template('user_posts.html', posts=posts, user=user)
 
@@ -181,7 +185,8 @@ def post_test(post_id):
         questions = json.loads(quest.questions)
     else:
         questions = 'none'
-    return render_template('test.html', question=questions, quest=quest ,title='Тестирование', is_not_author=is_not_author)
+    return render_template('test.html', question=questions, quest=quest, title='Тестирование',
+                           is_not_author=is_not_author)
 
 
 @app.route("/post/<int:post_id>/test/change", methods=['GET', 'POST'])
@@ -237,12 +242,14 @@ def result(post_id):
         quest = 'none'
         questions = 'none'
     dt = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    return render_template('result.html', title='Новый тест',post_id=post_id, questions=questions,quest=quest, legend='Новый тест', data=a, dt=dt)
+    return render_template('result.html', title='Результат', post_id=post_id, questions=questions, quest=quest,
+                           legend='Новый тест', data=a, dt=dt)
 
 
 def save_word(passed_test):
     user_by_id = db.session.query(User).filter(User.id == passed_test.user_id).order_by(User.id.desc()).first()
-    publication_by_id = db.session.query(Publication).filter(Publication.id == passed_test.test_id).order_by(Publication.id.desc()).first()
+    publication_by_id = db.session.query(Publication).filter(Publication.id == passed_test.test_id).order_by(
+        Publication.id.desc()).first()
 
     doc = docx.Document()
     style = doc.styles['Normal']
@@ -256,29 +263,55 @@ def save_word(passed_test):
     with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as temp:
         doc.save(temp.name)
         temp_path = temp.name
-    
+
     return temp_path
 
 
-@app.route("/post/<int:post_id>/test/result_handling/<int:score>/<int:user_id>/<int:test_id>/<string:passe_date>", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/test/result_handling/<int:score>/<int:user_id>/<int:test_id>/<string:passe_date>",
+           methods=['GET', 'POST'])
 @login_required
 def result_handling(post_id, score, user_id, test_id, passe_date):
     try:
         a = datetime.strptime(passe_date, "%d.%m.%Y %H:%M:%S")
         result2 = PassedTests(score=score, passe_date=a, user_id=user_id, test_id=test_id)
+        try:
+            qq = PassedTests.query.filter_by(user_id=user_id, test_id=test_id).all()
+            for q in qq:
+                db.session.delete(q)
+        except Exception as e:
+            print(str(e))
         db.session.add(result2)
         db.session.commit()
         passed_test = db.session.query(PassedTests).filter(PassedTests.user_id == current_user.id
-                                                           and PassedTests.test_id == test_id).order_by(PassedTests.id.desc()).first()
+                                                           and PassedTests.test_id == test_id).order_by(
+            PassedTests.id.desc()).first()
         temp_path = save_word(passed_test)
-        flash('Тестирование сохранено!', 'success')
+        flash(f'Тестирование сохранено!', 'success')
+
     except Exception as e:
         flash(f'Тестирование не сохранено! Ошибка: {str(e)}', 'danger')
-        return redirect(url_for('home'))
-    
+    finally:
+        response = make_response(send_file(temp_path, as_attachment=True))
+        response.headers[
+            'Content-Disposition'] = f'attachment; filename=test_result_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
+
+        return response
+
+
+@app.route("/result_handling2/<int:test_id>",
+           methods=['GET', 'POST'])
+@login_required
+def result_handling2(test_id):
+    passed_test = db.session.query(PassedTests).filter(PassedTests.user_id == current_user.id
+                                                       and PassedTests.test_id == test_id).order_by(
+        PassedTests.id.desc()).first()
+    temp_path = save_word(passed_test)
     response = make_response(send_file(temp_path, as_attachment=True))
-    response.headers['Content-Disposition'] = f'attachment; filename=test_result_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
+    response.headers[
+        'Content-Disposition'] = f'attachment; filename=test_result_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx'
+
     return response
+
 
 @app.errorhandler(403)
 @app.errorhandler(404)
