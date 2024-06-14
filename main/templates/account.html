@@ -65,7 +65,7 @@
             </div>
         </form>
     </div>
-    <h2 class="text-center m-4">Пройденные тестирования</h2>
+    <h2 class="text-center m-5">Пройденные тестирования</h2>
 
     <div class="d-flex flex-wrap col-md-10 justify-content-between m-auto">
         {% if quest %}
@@ -93,4 +93,32 @@
         <h5>Нет пройденных тестирований</h5>
         {% endif %}
     </div>
+
+    {% if current_user.role == 1 %}
+
+        <h2 class="text-center m-5">Результаты сотрудников</h2>
+        <table class="table mb-5 border">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Имя пользователя</th>
+              <th scope="col">Название тестирования</th>
+              <th scope="col">Точность ответов</th>
+              <th scope="col">Дата прохождения</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for ut in users_tests %}
+            <tr>
+              <th scope="row">{{ut[0].id}}</th>
+              <td>{{ut[0].username}}</td>
+              <td>{{ut[2].title}}</td>
+              <td>{{ut[1].score}}%</td>
+              <td>{{ut[1].passe_date.strftime("%d.%m.%Y %H:%M")}}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+    {% endif %}
+
 {% endblock content %}
