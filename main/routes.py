@@ -100,10 +100,15 @@ def account():
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
 
-    quest = db.session.query(PassedTests, Publication).filter(PassedTests.user_id==current_user.id).filter(PassedTests.test_id == Publication.id).all()
-    print(quest)
+    quest = (db.session.query(PassedTests, Publication)
+             .filter(PassedTests.user_id==current_user.id).filter(PassedTests.test_id == Publication.id).all())
+    users_tests = (db.session.query(User, PassedTests, Publication)
+                   .filter(PassedTests.user_id==User.id).filter(PassedTests.test_id == Publication.id).order_by(User.id)
+                   .all())
+
+    # print(users_tests)
     return render_template('account.html', title='Аккаунт',
-                           image_file=image_file, form=form, quest=quest)
+                           image_file=image_file, form=form, quest=quest,users_tests=users_tests)
 
 
 @app.route("/post/new", methods=['GET', 'POST'])
