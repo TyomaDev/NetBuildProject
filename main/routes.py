@@ -162,7 +162,14 @@ def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
-    db.session.delete(post)
+    test = (db.session.query(PassedTests, Publication, Post)
+            .filter(Post.id == post_id).filter(post_id == Publication.post_id)
+            .filter(PassedTests.test_id == Publication.id).all())
+    print(test)
+    for t in test:
+        for del_t in t:
+            print(del_t)
+            db.session.delete(del_t)
     db.session.commit()
     flash('Ваш материал удален!', 'success')
     return redirect(url_for('home'))
